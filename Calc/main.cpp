@@ -5,17 +5,17 @@
 
 HWND hDisplay;                                      // Поле ввода калькулятора
 double number_one = 0, number_two = 0, result = 0;  //Первое вводимое число, второе и результат
-char operation = '\0';                          //Текущая операция, L'0' - пустой символ
+char operation = '\0';                              //Текущая операция, L'0' - пустой символ
 
 //Тип wchar_t использовал для изменения кодировки, чтоб компилятор работал с русским языком и нормально работал с windows функциями
 
 bool newNumber = true;                              //Проверка на начало ввода
-std::string displayText = "0";                    //Текст на поле ввода
-std::string expression = "";                      //выражение
+std::string displayText = "0";                      //Текст на поле ввода
+std::string expression = "";                        //выражение
 
-void Calc_Function(char digit);                  //Обработка нажатия кнопок
+void Calc_Function(char digit);                     //Обработка нажатия кнопок
 void FullExpression();                              //Обновление дисплея
-void SetOperation(char op);                      //Выбор операции
+void SetOperation(char op);                         //Выбор операции
 void Calculate();                                   //Вычисление
 void Clear();                                       //Очистка
 BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);   //Обработка диалогового окна
@@ -41,16 +41,16 @@ void Calc_Function(char digit)
         }
         else
         {
-            expression = "";   //В противном случае очищаю
+            expression = "";        //В противном случае очищаю
         }
     }
-    else        //При продолжении ввода числа
+    else                            //При продолжении ввода числа
     {
         if (displayText == "0")
             displayText = digit;    //Замена нуля на число
         else
             displayText += digit;   //добавление числа к текущему
-        if (operation != '\0')     //При выбранной операции - обновляю выражение
+        if (operation != '\0')      //При выбранной операции - обновляю выражение
         {
             expression = std::to_string((int)number_one) + " " + operation + " " + displayText;
         }
