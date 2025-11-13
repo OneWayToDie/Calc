@@ -9,8 +9,8 @@
 #define IDC_BUTTON_THREE                1004
 #define IDC_BUTTON_DIVISION             1005
 #define IDC_BUTTON_FOUR                 1006
-#define IDC_BUTTON_FIVEE				1007
-#define IDC_BUTTON_SIXX					1008
+#define IDC_BUTTON_FIVEE                1007
+#define IDC_BUTTON_SIXX                 1008
 #define IDC_BUTTON_MULTIPLICATION       1009
 #define IDC_BUTTON_SEVEN                1010
 #define IDC_BUTTON_EIGHT                1011
@@ -20,6 +20,9 @@
 #define IDC_BUTTON_ZERO                 1015
 #define IDC_BUTTON_DELETE               1016
 #define IDC_BUTTON_ADDITION             1017
+#define IDC_BUTTON_SQRT                 1018
+#define IDC_BUTTON1                     1019
+#define IDC_BUTTON_POW                  1019
 
 // Next default values for new objects
 // 
@@ -27,7 +30,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1018
+#define _APS_NEXT_CONTROL_VALUE         1020
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -1,20 +1,20 @@
 ﻿#include<Windows.h>
 #include<string>
 #include<sstream>
+#include<cmath>
 #include"resource.h"
 
 HWND hDisplay;                                      // Поле ввода калькулятора
 double number_one = 0, number_two = 0, result = 0;  //Первое вводимое число, второе и результат
 char operation = '\0';                              //Текущая операция, L'0' - пустой символ
-
-//Тип wchar_t использовал для изменения кодировки, чтоб компилятор работал с русским языком и нормально работал с windows функциями
-
 bool newNumber = true;                              //Проверка на начало ввода
 std::string displayText = "0";                      //Текст на поле ввода
 std::string expression = "";                        //выражение
+bool hasSquareRoot = false;                         //Проверка на наличие квадратного корня в выражении
 
 void Calc_Function(char digit);                     //Обработка нажатия кнопок
 void FullExpression();                              //Обновление дисплея
+void SquareRoot();                                  //Функция для вычисления квадратного корня
 void SetOperation(char op);                         //Выбор операции
 void Calculate();                                   //Вычисление
 void Clear();                                       //Очистка
@@ -36,8 +36,15 @@ void Calc_Function(char digit)
 
         if (operation != '\0') //Если операция выбрана
         {
-            //Создаю выражение типа: число, операция, число
-            expression = std::to_string((int)number_one) + " " + operation + " " + displayText;
+            if (hasSquareRoot)
+            {
+               //Если есть квадратный корень в выражении:
+               expression = std::to_string((int)number_one) + " " + operation + "Sqrt" + displayText;
+            }
+            else
+            {
+                expression = std::to_string((int)number_one) + " " + operation + " " + displayText; //Если нет кв. корня - обычное выражение
+            }
         }
         else
         {
@@ -52,7 +59,14 @@ void Calc_Function(char digit)
             displayText += digit;   //добавление числа к текущему
         if (operation != '\0')      //При выбранной операции - обновляю выражение
         {
-            expression = std::to_string((int)number_one) + " " + operation + " " + displayText;
+            if (hasSquareRoot)
+            {
+                expression = std::to_string((int)number_one) + " " + operation + "Sqrt" + displayText;
+            }
+            else
+            {
+                expression = std::to_string((int)number_one) + " " + operation + " " + displayText;
+            }
         }
     }
     FullExpression();               //Изменяем вывод на дисплее
@@ -64,14 +78,36 @@ void FullExpression()
     SetWindowText(hDisplay, expression.empty() ? displayText.c_str() : expression.c_str());
 }
 
+void SquareRoot()
+{
+    if (!newNumber && operation != '\0')
+    {
+        hasSquareRoot = true; //ставлю значение на наличие квадратного корня
+
+        // Обновляю выражение
+        expression = std::to_string((int)number_one) + " " + operation + "Sqrt";
+        FullExpression();
+
+        // Сбрасываю дисплей для ввода числа под корнем
+        displayText = "0";
+        newNumber = true;
+    }
+    else if (newNumber && operation != L'\0' && !hasSquareRoot) // Если операция выбрана, но число еще не введено
+    {
+        hasSquareRoot = true;
+        expression = std::to_string((int)number_one) + " " + operation + "Sqrt";
+        FullExpression();
+    }
+}
+
 void SetOperation(char op)
 {
     if (!newNumber) //Если число введено
     {
         number_one = std::stod(displayText.c_str(), nullptr);   //Преобразую текст в число
-        operation = op;                                         //Сохраняю операци.
+        operation = op;                                         //Сохраняю операцию
         newNumber = true;                                       //Готовность в вводу второго числа
-
+        hasSquareRoot = false;                                  //Квадратного корня нема
         expression = displayText + " " + operation + " ";       //Показываю число, операцию и второе число
         FullExpression();
     }
@@ -79,6 +115,10 @@ void SetOperation(char op)
     {
         operation = op;                                         //Меняю операцию
         expression = std::to_string((int)number_one) + " " + operation + " ";
+        if (hasSquareRoot)
+        {
+            expression += "Sqrt";                               //Если кв. корень был - сохраняю его в выражении
+        }
         FullExpression();
     }
 }
@@ -88,6 +128,22 @@ void Calculate()
     if (!newNumber && operation != L'\0')                       //Если есть второе число и операция
     {
         number_two = std::stod(displayText.c_str(), nullptr);   //Преобразую второе число
+
+        if (hasSquareRoot)                      
+        {
+            if (number_two >= 0)
+            {
+                number_two = std::sqrt(number_two);
+            }
+            else
+            {
+                expression = "Число отрицательное, не могу вычислить корень";
+                FullExpression();
+                return;
+            }
+        }
+
+        std::string ourExpression = expression;                 //Сохраняю выражение
 
         switch (operation)                                      //Выполняю выбранную операцию
         {
@@ -107,8 +163,8 @@ void Calculate()
         }
         std::stringstream ss;
         ss << result;                                              //Преобразую результат в строку
-        expression += ss.str();                                    //Добавляю результат к выражению
-
+        expression = ourExpression + " = " + ss.str();             
+        FullExpression();
         displayText = ss.str();                                    //Сохраняю результат как текущее число
         expression = "";                                           //Очищаю выражение(показываю результат)
         number_one = result;                                       //Сохраняю результат для дальнейшей работы с ним
@@ -180,6 +236,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             //Обработка специальных кнопок
         case IDC_BUTTON_EQUALS: Calculate(); break;
         case IDC_BUTTON_DELETE: Clear(); break;
+        case IDC_BUTTON_SQRT: SquareRoot(); break;
 
         case IDCANCEL:
             EndDialog(hwnd, 0); //Закрываю диалоговое окно калькулятора
