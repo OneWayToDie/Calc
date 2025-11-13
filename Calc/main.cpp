@@ -1,0 +1,197 @@
+#include<Windows.h>
+#include<string>
+#include<sstream>
+#include"resource.h"
+
+HWND hDisplay;                                      // Поле ввода калькулятора
+double number_one = 0, number_two = 0, result = 0;  //Первое вводимое число, второе и результат
+wchar_t operation = L'\0';                          //Текущая операция, L'0' - пустой символ
+
+//Тип wchar_t использовал для изменения кодировки, чтоб компилятор работал с руссикм языком
+
+bool newNumber = true;                              //Проверка на начало ввода
+std::wstring displayText = L"0";                    //Текст на поле ввода
+std::wstring expression = L"";                      //выражение
+
+void Calc_Function(wchar_t digit);                  //Обработка нажатия кнопок
+void FullExpression();                              //Обновление дисплея
+void SetOperation(wchar_t op);                      //Выбор операции
+void Calculate();                                   //Вычисление
+void Clear();                                       //Очистка
+BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);   //Обработка диалогового окна
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+    setlocale(LC_ALL, "");
+    DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG_CALCULATOR), NULL, (DLGPROC)DlgProc, 0);
+    return 0;
+}
+
+void Calc_Function(wchar_t digit)
+{
+    if (newNumber)
+    {
+        displayText = digit;    //Замена нуля на введённую цифру
+        newNumber = false;      //Сбрасываю новое число
+
+        if (operation != L'\0') //Если операция выбрана
+        {
+            //Создаю выражение типа: число, операция, число
+            expression = std::to_wstring((int)number_one) + L" " + operation + L" " + displayText;
+        }
+        else
+        {
+            expression = L"";   //В противном случае очищаю
+        }
+    }
+    else        //При продолжении ввода числа
+    {
+        if (displayText == L"0")
+            displayText = digit;    //Замена нуля на число
+        else
+            displayText += digit;   //добавление числа к текущему
+        if (operation != L'\0')     //При выбранной операции - обновляю выражение
+        {
+            expression = std::to_wstring((int)number_one) + L" " + operation + L" " + displayText;
+        }
+    }
+    FullExpression();               //Изменяем вывод на дисплее
+}
+
+void FullExpression()
+{
+    //Если выражение пустое - показываю displayText, или само выражение
+    SetWindowText(hDisplay, expression.empty() ? displayText.c_str() : expression.c_str());
+}
+
+void SetOperation(wchar_t op)
+{
+    if (!newNumber) //Если число введено
+    {
+        number_one = std::wcstod(displayText.c_str(), nullptr); //Преобразую текст в число
+        operation = op;                                         //Сохраняю операци.
+        newNumber = true;                                       //Готовность в вводу второго числа
+
+        expression = displayText + L" " + operation + L" ";     //Показываю число, операцию и второе число
+        FullExpression();
+    }
+    else if (operation != L'\0')                                //Если операция уже была выбрана
+    {
+        operation = op;                                         //Меняю операцию
+        expression = std::to_wstring((int)number_one) + L" " + operation + L" ";
+        FullExpression();
+    }
+}
+
+void Calculate()
+{
+    if (!newNumber && operation != L'\0')                       //Если есть второе число и операция
+    {
+        number_two = std::wcstod(displayText.c_str(), nullptr); //Преобразую второе число
+
+        switch (operation)                                      //Выполняю выбранную операцию
+        {
+        case L'+': result = number_one + number_two; break;
+        case L'-': result = number_one - number_two; break;
+        case L'*': result = number_one * number_two; break;
+        case L'/':
+            if(number_two != 0)
+                result = number_one / number_two;
+            else
+            {
+                expression = L"На ноль делить нельзя";
+                FullExpression();
+                return;                                           //При делении на ноль выхожу из программы  
+            }
+            break;
+        }
+        std::wstringstream ss;
+        ss << result;                                              //Преобразую результат в строку
+        expression += ss.str();                                    //Добавляю результат к выражению
+
+        displayText = ss.str();                                    //Сохраняю результат как текущее число
+        expression = L"";                                          //Очищаю выражение(показываю результат)
+        number_one = result;                                       //Сохраняю результат для дальнейшей работы с ним
+        operation = L'\0';                                         //Сбрасываю операцию
+        newNumber = false;                                         //Готовность к вводу нового числа
+        FullExpression();
+    }
+}
+
+void Clear()
+{
+    number_one = number_two = result = 0;                           //Обнуляю числа
+    operation = L'\0';                                              //Сбрасываю операцию
+    displayText = L"0";                                             //Сбрасываю дисплей
+    newNumber = true;                                               //Готовность к вводу нового числа
+    FullExpression();                                               //Обновляю дисплей до 0
+}
+
+BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (msg)                //Обработка разных типов сообщений
+    {
+    case WM_INITDIALOG:         //Сообщение инициализации диалога
+    {
+        hDisplay = GetDlgItem(hwnd, IDC_EDIT_DISPLAY);  //указатель на поле ввода
+        
+        //Создаю шрифт
+        HFONT hFont = CreateFont
+        (20,                    //Высота шрифта
+         0,                     //Ширина( 0 = автоматическому выбору)
+         0,                     //Угол наклона
+         0,                     //Угол ориентации
+         FW_NORMAL,             //Толщина
+         FALSE,                 //Курсив(True = да, False = нет)
+         FALSE,                 //Подчёркивание
+         FALSE,                 //Зачёркивание
+         DEFAULT_CHARSET,       //Кодировка
+         OUT_DEFAULT_PRECIS,    //Точность вывода
+         CLIP_DEFAULT_PRECIS,   //Качество
+         DEFAULT_QUALITY,       //Шаг и семейство
+         DEFAULT_PITCH, L"Times New Roman" //Название шрифта
+        );
+        SendMessage(hDisplay, WM_SETFONT, (WPARAM)hFont, TRUE);
+    }
+        return TRUE;
+
+    case WM_COMMAND:            //Сигнал от кнопок
+    {
+        switch (LOWORD(wParam)) //Определяю какая кнопка нажата
+        {
+            //Обработка кнопок
+        case IDC_BUTTON_ONE: Calc_Function(L'1'); break;
+        case IDC_BUTTON_TWO: Calc_Function(L'2'); break;
+        case IDC_BUTTON_THREE: Calc_Function(L'3'); break;
+        case IDC_BUTTON_FOUR: Calc_Function(L'4'); break;
+        case IDC_BUTTON_FIVEE: Calc_Function(L'5'); break;
+        case IDC_BUTTON_SIXX: Calc_Function(L'6'); break;
+        case IDC_BUTTON_SEVEN: Calc_Function(L'7'); break;
+        case IDC_BUTTON_EIGHT: Calc_Function(L'8'); break;
+        case IDC_BUTTON_NINE: Calc_Function(L'9'); break;
+        case IDC_BUTTON_ZERO: Calc_Function(L'0'); break;
+
+            //Обработка Операций
+        case IDC_BUTTON_ADDITION: SetOperation(L'+'); break;
+        case IDC_BUTTON_SUBTRACTION: SetOperation(L'-'); break;
+        case IDC_BUTTON_MULTIPLICATION: SetOperation(L'*'); break;
+        case IDC_BUTTON_DIVISION: SetOperation(L'/'); break;
+
+            //Обработка специальных кнопок
+        case IDC_BUTTON_EQUALS: Calculate(); break;
+        case IDC_BUTTON_DELETE: Clear(); break;
+
+        case IDOK:
+        case IDCANCEL:
+            EndDialog(hwnd, 0); //Закрываю диалоговое окно калькулятора
+            return TRUE;
+        }
+    }
+    break;
+    case WM_CLOSE:
+        EndDialog(hwnd, 0); //Сообщаю программе о закрытии окна
+        return TRUE;
+    }
+
+    return FALSE;
+}
