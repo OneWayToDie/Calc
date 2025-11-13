@@ -68,11 +68,11 @@ void SetOperation(char op)
 {
     if (!newNumber) //Если число введено
     {
-        number_one = std::stod(displayText.c_str(), nullptr); //Преобразую текст в число
+        number_one = std::stod(displayText.c_str(), nullptr);   //Преобразую текст в число
         operation = op;                                         //Сохраняю операци.
         newNumber = true;                                       //Готовность в вводу второго числа
 
-        expression = displayText + " " + operation + " ";     //Показываю число, операцию и второе число
+        expression = displayText + " " + operation + " ";       //Показываю число, операцию и второе число
         FullExpression();
     }
     else if (operation != L'\0')                                //Если операция уже была выбрана
@@ -87,7 +87,7 @@ void Calculate()
 {
     if (!newNumber && operation != L'\0')                       //Если есть второе число и операция
     {
-        number_two = std::stod(displayText.c_str(), nullptr); //Преобразую второе число
+        number_two = std::stod(displayText.c_str(), nullptr);   //Преобразую второе число
 
         switch (operation)                                      //Выполняю выбранную операцию
         {
@@ -110,9 +110,9 @@ void Calculate()
         expression += ss.str();                                    //Добавляю результат к выражению
 
         displayText = ss.str();                                    //Сохраняю результат как текущее число
-        expression = "";                                          //Очищаю выражение(показываю результат)
+        expression = "";                                           //Очищаю выражение(показываю результат)
         number_one = result;                                       //Сохраняю результат для дальнейшей работы с ним
-        operation = '\0';                                         //Сбрасываю операцию
+        operation = '\0';                                          //Сбрасываю операцию
         newNumber = false;                                         //Готовность к вводу нового числа
         FullExpression();
     }
@@ -181,7 +181,6 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case IDC_BUTTON_EQUALS: Calculate(); break;
         case IDC_BUTTON_DELETE: Clear(); break;
 
-        case IDOK:
         case IDCANCEL:
             EndDialog(hwnd, 0); //Закрываю диалоговое окно калькулятора
             return TRUE;

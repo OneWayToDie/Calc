@@ -1,0 +1,11 @@
+DialogBox -			https://learn.microsoft.com/ru-ru/windows/win32/dlgbox/using-dialog-boxes
+MAKEINTRESOURCE -	https://learn.microsoft.com/ru-ru/windows/win32/api/winuser/nf-winuser-makeintresourcea
+SetWindowText -		https://learn.microsoft.com/ru-ru/windows/win32/learnwin32/working-with-strings
+WM_INITDIALOG -		https://learn.microsoft.com/ru-ru/windows/win32/dlgbox/wm-initdialog
+HFONT -				https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createfonta
+SendMessage -		https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendmessage
+WM_COMMAND -		https://learn.microsoft.com/ru-ru/windows/win32/menurc/wm-command
+LOWORD -			https://learn.microsoft.com/ru-ru/windows/win32/winmsg/loword
+IDC_BUTTON -		https://learn.microsoft.com/ru-ru/cpp/mfc/reference/cwnd-class?view=msvc-170
+WM_CLOSE -			https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-close
+MessageBox -		https://learn.microsoft.com/ru-ru/windows/win32/api/winuser/nf-winuser-messagebox
