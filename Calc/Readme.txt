@@ -9,3 +9,4 @@ LOWORD -			https://learn.microsoft.com/ru-ru/windows/win32/winmsg/loword
 IDC_BUTTON -		https://learn.microsoft.com/ru-ru/cpp/mfc/reference/cwnd-class?view=msvc-170
 WM_CLOSE -			https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-close
 MessageBox -		https://learn.microsoft.com/ru-ru/windows/win32/api/winuser/nf-winuser-messagebox
+DlgProc -			https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-dlgproc

@@ -4,12 +4,12 @@
 #include<cmath>
 #include"resource.h"
 
-HWND hDisplay;                                      // Поле ввода калькулятора
+HWND hDisplay;                                      //Поле ввода калькулятора
 double number_one = 0, number_two = 0, result = 0;  //Первое вводимое число, второе и результат
 char operation = '\0';                              //Текущая операция, L'0' - пустой символ
 bool newNumber = true;                              //Проверка на начало ввода
 std::string displayText = "0";                      //Текст на поле ввода
-std::string expression = "";                        //выражение
+std::string expression = "";                        //Выражение
 bool hasSquareRoot = false;                         //Проверка на наличие квадратного корня в выражении
 
 void Calc_Function(char digit);                     //Обработка нажатия кнопок
@@ -75,7 +75,7 @@ void Calc_Function(char digit)
 void FullExpression()
 {
     //Если выражение пустое - показываю displayText, или само выражение
-    SetWindowText(hDisplay, expression.empty() ? displayText.c_str() : expression.c_str());
+    SetWindowText(hDisplay, expression.empty() ? displayText.c_str() : expression.c_str()); //SetWindowText - отвечает за показ текста в "главном окне"
 }
 
 void SquareRoot()
@@ -183,11 +183,12 @@ void Clear()
     FullExpression();                                               //Обновляю дисплей до 0
 }
 
-BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) //DlgProc - Dialog Procedure - обработчик далогового окна, hwnd - указатель на окно
+//msg - отвечает за тип сообщения, wParam и lParam - отвечают за доп информацию об объекте
 {
     switch (msg)                //Обработка разных типов сообщений
     {
-    case WM_INITDIALOG:         //Сообщение инициализации диалога
+    case WM_INITDIALOG:         //Сообщение инициализации диалога(WM_INITDIALOG - настраивает элементы перед показом окна)
     {
         hDisplay = GetDlgItem(hwnd, IDC_EDIT_DISPLAY);  //указатель на поле ввода
         
@@ -209,14 +210,14 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         );
         SendMessage(hDisplay, WM_SETFONT, (WPARAM)hFont, TRUE);
     }
-        return TRUE;
+    return TRUE;
 
-    case WM_COMMAND:            //Сигнал от кнопок
+    case WM_COMMAND:            //Сигнал от кнопок(WM_COMMAND - Window Message - COMMAND from control)
     {
-        switch (LOWORD(wParam)) //Определяю какая кнопка нажата
+        switch (LOWORD(wParam)) //Определяю какая кнопка нажата(LOWORD(wParam) - в данном случае определяет id элемента(LOWer WORD of wParam))
         {
             //Обработка кнопок
-        case IDC_BUTTON_ONE: Calc_Function('1'); break;
+        case IDC_BUTTON_ONE: Calc_Function('1'); break; //IDC_BUTTON - айди кнопок цифр и привязка к ним
         case IDC_BUTTON_TWO: Calc_Function('2'); break;
         case IDC_BUTTON_THREE: Calc_Function('3'); break;
         case IDC_BUTTON_FOUR: Calc_Function('4'); break;
@@ -228,13 +229,13 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case IDC_BUTTON_ZERO: Calc_Function('0'); break;
 
             //Обработка Операций
-        case IDC_BUTTON_ADDITION: SetOperation('+'); break;
+        case IDC_BUTTON_ADDITION: SetOperation('+'); break; //Айди кнопок операций и привязка операций к кнопкам
         case IDC_BUTTON_SUBTRACTION: SetOperation('-'); break;
         case IDC_BUTTON_MULTIPLICATION: SetOperation('*'); break;
         case IDC_BUTTON_DIVISION: SetOperation('/'); break;
 
             //Обработка специальных кнопок
-        case IDC_BUTTON_EQUALS: Calculate(); break;
+        case IDC_BUTTON_EQUALS: Calculate(); break; //Айди специальных кнопок и привязка их к кнопкам
         case IDC_BUTTON_DELETE: Clear(); break;
         case IDC_BUTTON_SQRT: SquareRoot(); break;
 
@@ -244,7 +245,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
     }
     break;
-    case WM_CLOSE:
+    case WM_CLOSE:  //Window Message - ClOSE window, закрываем окно.
         EndDialog(hwnd, 0); //Сообщаю программе о закрытии окна
         return TRUE;
     }
