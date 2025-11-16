@@ -6,15 +6,18 @@
 
 HWND hDisplay;                                      //Поле ввода калькулятора
 double number_one = 0, number_two = 0, result = 0;  //Первое вводимое число, второе и результат
+double number_three = 0;                            //Число, которое будет нужно для возведения в степень
 char operation = '\0';                              //Текущая операция, L'0' - пустой символ
 bool newNumber = true;                              //Проверка на начало ввода
 std::string displayText = "0";                      //Текст на поле ввода
 std::string expression = "";                        //Выражение
 bool hasSquareRoot = false;                         //Проверка на наличие квадратного корня в выражении
+bool hasPowRoot = false;                            //Проверка на наличие возведения в степень
 
 void Calc_Function(char digit);                     //Обработка нажатия кнопок
 void FullExpression();                              //Обновление дисплея
 void SquareRoot();                                  //Функция для вычисления квадратного корня
+void PowRoot();                                     //Функция для возведения в степень
 void SetOperation(char op);                         //Выбор операции
 void Calculate();                                   //Вычисление
 void Clear();                                       //Очистка
@@ -38,13 +41,21 @@ void Calc_Function(char digit)
         {
             if (hasSquareRoot)
             {
-               //Если есть квадратный корень в выражении:
-               expression = std::to_string((int)number_one) + " " + operation + "Sqrt" + displayText;
+                //Если есть квадратный корень в выражении:
+                expression = std::to_string((int)number_one) + " " + operation + "Sqrt" + displayText;
+            }
+            else if (hasPowRoot)
+            {
+                expression = std::to_string((int)number_one) + " " + operation + " " + std::to_string((int)number_three) + "Pow" + displayText;
             }
             else
             {
                 expression = std::to_string((int)number_one) + " " + operation + " " + displayText; //Если нет кв. корня - обычное выражение
             }
+        }
+        else if (hasPowRoot && !operation)
+        {
+            expression = std::to_string((int)number_one) + "Pow" + displayText;
         }
         else
         {
@@ -63,10 +74,18 @@ void Calc_Function(char digit)
             {
                 expression = std::to_string((int)number_one) + " " + operation + "Sqrt" + displayText;
             }
+            else if (hasPowRoot)
+            {
+                expression = std::to_string((int)number_one) + " " + operation + " " + std::to_string((int)number_three) + "Pow" + displayText;
+            }
             else
             {
                 expression = std::to_string((int)number_one) + " " + operation + " " + displayText;
             }
+        }
+        else if (hasPowRoot && !operation)
+        {
+            expression = std::to_string((int)number_one) + "Pow" + displayText;
         }
     }
     FullExpression();               //Изменяем вывод на дисплее
@@ -83,20 +102,47 @@ void SquareRoot()
     if (!newNumber && operation != '\0')
     {
         hasSquareRoot = true; //ставлю значение на наличие квадратного корня
-
         // Обновляю выражение
         expression = std::to_string((int)number_one) + " " + operation + "Sqrt";
         FullExpression();
-
         // Сбрасываю дисплей для ввода числа под корнем
         displayText = "0";
         newNumber = true;
     }
-    else if (newNumber && operation != L'\0' && !hasSquareRoot) // Если операция выбрана, но число еще не введено
+    else if (newNumber && operation != '\0' && !hasSquareRoot) // Если операция выбрана, но число еще не введено
     {
         hasSquareRoot = true;
         expression = std::to_string((int)number_one) + " " + operation + "Sqrt";
         FullExpression();
+    }
+}
+void PowRoot()
+{
+    if (!newNumber && operation != '\0')
+    {
+        hasPowRoot = true;
+        number_three = std::stod(displayText.c_str(), nullptr); //Сохранил основание степени
+        expression = std::to_string((int)number_one) + " " + operation + " " + std::to_string((int)number_three) + "Pow";
+        FullExpression();
+        displayText = "0";
+        newNumber = true;
+    }
+    else if (newNumber && operation != '\0' && !hasPowRoot)
+    {
+        hasPowRoot = true;
+        expression = std::to_string((int)number_one) + " " + operation + "Pow";
+        FullExpression();
+        displayText = "0";
+        newNumber = true;
+    }
+    else if (!newNumber && operation == '\0')
+    {
+        number_one = std::stod(displayText.c_str(), nullptr);
+        hasPowRoot = true;
+        expression = displayText + "Pow";
+        FullExpression();
+        displayText = "0";
+        newNumber = true;
     }
 }
 
@@ -108,10 +154,11 @@ void SetOperation(char op)
         operation = op;                                         //Сохраняю операцию
         newNumber = true;                                       //Готовность в вводу второго числа
         hasSquareRoot = false;                                  //Квадратного корня нема
+        hasPowRoot = false;                                     //Возведения в степень нема
         expression = displayText + " " + operation + " ";       //Показываю число, операцию и второе число
         FullExpression();
     }
-    else if (operation != L'\0')                                //Если операция уже была выбрана
+    else if (operation != '\0')                                //Если операция уже была выбрана
     {
         operation = op;                                         //Меняю операцию
         expression = std::to_string((int)number_one) + " " + operation + " ";
@@ -119,17 +166,23 @@ void SetOperation(char op)
         {
             expression += "Sqrt";                               //Если кв. корень был - сохраняю его в выражении
         }
+        else if (hasPowRoot)
+        {
+            expression += std::to_string((int)number_three) + "Pow";
+        }
         FullExpression();
     }
 }
 
 void Calculate()
 {
-    if (!newNumber && operation != L'\0')                       //Если есть второе число и операция
+    if (!newNumber && operation != '\0')                       //Если есть второе число и операция
     {
         number_two = std::stod(displayText.c_str(), nullptr);   //Преобразую второе число
 
-        if (hasSquareRoot)                      
+        double number_two_pow = number_two;
+
+        if (hasSquareRoot)
         {
             if (number_two >= 0)
             {
@@ -142,17 +195,20 @@ void Calculate()
                 return;
             }
         }
-
+        else if (hasPowRoot)
+        {
+            number_two_pow = std::pow(number_three, number_two);
+        }
         std::string ourExpression = expression;                 //Сохраняю выражение
 
         switch (operation)                                      //Выполняю выбранную операцию
         {
-        case '+': result = number_one + number_two; break;
-        case '-': result = number_one - number_two; break;
-        case '*': result = number_one * number_two; break;
+        case '+': result = number_one + number_two_pow; break;
+        case '-': result = number_one - number_two_pow; break;
+        case '*': result = number_one * number_two_pow; break;
         case '/':
-            if(number_two != 0)
-                result = number_one / number_two;
+            if (number_two != 0)
+                result = number_one / number_two_pow;
             else
             {
                 expression = "На ноль делить нельзя";
@@ -163,13 +219,38 @@ void Calculate()
         }
         std::stringstream ss;
         ss << result;                                              //Преобразую результат в строку
-        expression = ourExpression + " = " + ss.str();             
+        expression = ourExpression + " = " + ss.str();
         FullExpression();
         displayText = ss.str();                                    //Сохраняю результат как текущее число
         expression = "";                                           //Очищаю выражение(показываю результат)
         number_one = result;                                       //Сохраняю результат для дальнейшей работы с ним
         operation = '\0';                                          //Сбрасываю операцию
         newNumber = false;                                         //Готовность к вводу нового числа
+        hasPowRoot = false;
+        hasSquareRoot = false;
+        FullExpression();
+    }
+    else if (hasPowRoot && operation == '\0')
+    {
+        double base = number_one;
+        double exponent = std::stod(displayText.c_str(), nullptr);
+
+        result = std::pow(base, exponent);
+
+        std::stringstream ss;
+        ss << result;
+
+        expression = std::to_string((int)base) + "^" + std::to_string((int)exponent) + " = " + ss.str();
+        FullExpression();
+
+        Sleep(1000);
+
+        displayText = ss.str();
+        expression = "";
+        number_one = result;
+        hasPowRoot = false;
+        newNumber = true;
+
         FullExpression();
     }
 }
@@ -180,6 +261,8 @@ void Clear()
     operation = '\0';                                              //Сбрасываю операцию
     displayText = "0";                                             //Сбрасываю дисплей
     newNumber = true;                                               //Готовность к вводу нового числа
+    hasSquareRoot = false;
+    hasPowRoot = false;
     FullExpression();                                               //Обновляю дисплей до 0
 }
 
@@ -190,23 +273,25 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) //DlgPr
     {
     case WM_INITDIALOG:         //Сообщение инициализации диалога(WM_INITDIALOG - настраивает элементы перед показом окна)
     {
+        HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+        SendMessage(hwnd, WM_SETICON, 0, (LPARAM)hIcon);
         hDisplay = GetDlgItem(hwnd, IDC_EDIT_DISPLAY);  //указатель на поле ввода
-        
+
         //Создаю шрифт
         HFONT hFont = CreateFont
         (20,                    //Высота шрифта
-         0,                     //Ширина( 0 = автоматическому выбору)
-         0,                     //Угол наклона
-         0,                     //Угол ориентации
-         FW_NORMAL,             //Толщина
-         FALSE,                 //Курсив(True = да, False = нет)
-         FALSE,                 //Подчёркивание
-         FALSE,                 //Зачёркивание
-         DEFAULT_CHARSET,       //Кодировка
-         OUT_DEFAULT_PRECIS,    //Точность вывода
-         CLIP_DEFAULT_PRECIS,   //Качество
-         DEFAULT_QUALITY,       //Шаг и семейство
-         DEFAULT_PITCH, "Times New Roman" //Название шрифта
+            0,                     //Ширина( 0 = автоматическому выбору)
+            0,                     //Угол наклона
+            0,                     //Угол ориентации
+            FW_NORMAL,             //Толщина
+            FALSE,                 //Курсив(True = да, False = нет)
+            FALSE,                 //Подчёркивание
+            FALSE,                 //Зачёркивание
+            DEFAULT_CHARSET,       //Кодировка
+            OUT_DEFAULT_PRECIS,    //Точность вывода
+            CLIP_DEFAULT_PRECIS,   //Качество
+            DEFAULT_QUALITY,       //Шаг и семейство
+            DEFAULT_PITCH, "Times New Roman" //Название шрифта
         );
         SendMessage(hDisplay, WM_SETFONT, (WPARAM)hFont, TRUE);
     }
@@ -238,6 +323,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) //DlgPr
         case IDC_BUTTON_EQUALS: Calculate(); break; //Айди специальных кнопок и привязка их к кнопкам
         case IDC_BUTTON_DELETE: Clear(); break;
         case IDC_BUTTON_SQRT: SquareRoot(); break;
+        case IDC_BUTTON_POW: PowRoot(); break;
 
         case IDCANCEL:
             EndDialog(hwnd, 0); //Закрываю диалоговое окно калькулятора

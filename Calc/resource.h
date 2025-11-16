@@ -3,6 +3,7 @@
 // Used by Resource.rc
 //
 #define IDD_DIALOG_CALCULATOR           101
+#define IDI_ICON1                       103
 #define IDC_BUTTON_ONE                  1001
 #define IDC_EDIT_DISPLAY                1002
 #define IDC_BUTTON_TWO                  1003
@@ -21,14 +22,13 @@
 #define IDC_BUTTON_DELETE               1016
 #define IDC_BUTTON_ADDITION             1017
 #define IDC_BUTTON_SQRT                 1018
-#define IDC_BUTTON1                     1019
 #define IDC_BUTTON_POW                  1019
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        103
+#define _APS_NEXT_RESOURCE_VALUE        104
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1020
 #define _APS_NEXT_SYMED_VALUE           101
